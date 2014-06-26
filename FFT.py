@@ -77,24 +77,35 @@ def transpose(A):
 def two_d_FFT(A):
   num_rows = len(A)
   num_col = len(A[0])
-  output = [[]*num_col]*num_rows
+  output = np.array([[0]*num_col]*num_rows)
   for i in range(num_rows):
     output[i] = FFT(A[i])
   output = output.T
-  output2 = [[]*num_rows]*num_col
+  output2 = np.array([[0]*num_rows]*num_col)
   for i in range(num_col):
     output2[i] = FFT(output[i])
   return output2.T
   
+def two_d_iFFT(A):
+  num_rows = len(A)
+  num_col = len(A[0])
+  output = np.array([[0]*num_col]*num_rows)
+  for i in range(num_rows):
+    output[i] = iFFT(A[i])
+  output = output.T
+  output2 = np.array([[0]*num_rows]*num_col)
+  for i in range(num_col):
+    output2[i] = iFFT(output[i])
+  return output2.T
   
     
 def main():
   A = [[1,2,3,4],[1,2,3,4]]
   A_col = np.array([[1],[2],[3],[4]])
-  
-  '''print FFT(iFFT(A))
-  print DFT(iDFT(A_col))'''
-  two_d_FFT
+  B = np.array([[8,4],[10,1]])
+  C = two_d_FFT(B)
+  print C
+  print two_d_iFFT(C)
   
 
 main()
