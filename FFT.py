@@ -79,12 +79,12 @@ def two_d_FFT(A):
   num_rows = len(A)
   num_cols = len(A[0])
   # output = np.array([[0]*num_col]*num_rows)
-  output = np.array([[0.]*num_cols for _ in range(num_rows)])
+  output = np.array([[0.+1j]*num_cols for _ in range(num_rows)])
   for i in range(num_rows):
     output[i] = FFT(A[i])
   output = output.T
   # output2 = np.array([[0]*num_rows]*num_col)
-  output2 = np.array([[0.]*num_rows for _ in range(num_cols)])
+  output2 = np.array([[0.+1j]*num_rows for _ in range(num_cols)])
   for i in range(num_cols):
     output2[i] = FFT(output[i])
   return output2.T
@@ -92,24 +92,24 @@ def two_d_FFT(A):
 def two_d_iFFT(A):
   num_rows = len(A)
   num_cols = len(A[0])
-  output = np.array([[0.]*num_cols for _ in range(num_rows)])
+  output = np.array([[0.+1j]*num_cols for _ in range(num_rows)])
   for i in range(num_rows):
     output[i] = iFFT(A[i])
   output = output.T
-  output2 = np.array([[0.]*num_rows for _ in range(num_cols)])
+  output2 = np.array([[0.+1j]*num_rows for _ in range(num_cols)])
   for i in range(num_cols):
     output2[i] = iFFT(output[i])
-  print "finished two_d_FFT"
+  print "finished two_d_iFFT"
   return output2.T
   
     
 def main():
-  A = [[1,2,3,4],[1,2,3,4]]
+  A = [[1.,2.,3.,4.],[1.,2.,3.,4.]]
   A_col = np.array([[1],[2],[3],[4]])
-  B = np.array([[8,4],[10,1]])
+  B = np.array([[8.,4.],[10.,1.]])
   C = two_d_FFT(B)
   print C
   print two_d_iFFT(C)
   
 
-main()
+#main()

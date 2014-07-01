@@ -31,6 +31,35 @@ def get_image(filename="images/tiger.jpg"):
   print "got image, padded dimensions with zeros"
   return output
 
+def return_image(img,filename="output.jpg"):
+    #arr=(img).astype('uint8')
+    data=[]
+    img=normalize(img)
+    for row in img:
+      data+=list(row)
+    data=np.array(data)
+    data=data.astype('uint8')
+    img=img.astype('uint8')
+    data=np.asarray(img)
 
+    im=Image.fromarray(data)
+    #im.show()
+    im.save(filename,"JPEG")
 
-  
+def normalize(matrix, maxcolor=255., mincolor=0,):
+  #find the maximum
+  m=[]#max 
+  s=[]#min
+  for row in matrix:
+    m.append(max(row))
+    s.append(min(row))
+  matrix_max=max(m)
+  matrix_min=min(s)
+  #print matrix_max, matrix_min
+  a=(mincolor-maxcolor)/(matrix_min-matrix_max)
+  b=(matrix_min*maxcolor-matrix_max*mincolor)/(matrix_min-matrix_max)
+  return a*matrix+b
+  #for row in matrix:
+  #  for column in row:
+  #    matrix[row][column]*=n_factor
+  #return matrix  
