@@ -9,7 +9,6 @@ def get_image(filename="images/tiger.jpg"):
   img = Image.open(filename)
   img = img.convert('L')
   width,height = img.size
-  print "width", width
   n = 1
   while True:
     if width <= 2**n:
@@ -29,9 +28,7 @@ def get_image(filename="images/tiger.jpg"):
   data = img.getdata()
   output = np.array([])
   output = np.array([np.array([data[i] for i in range(n*width,(n+1)*width)]+row_pad) for n in range(height)]+extra_rows)
-
-
-  print output
+  print "got image, padded dimensions with zeros"
   return output
 
 
