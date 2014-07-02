@@ -22,7 +22,7 @@ def FFT(A):
     w *= w_n
   return y
 
-def DFT(A_col):
+def DFT1(A_col):
   n = len(A_col)
   w_n = np.exp(2*np.pi*1j/n)
   #V = np.array([[0.+1j]*n]*n)
@@ -32,7 +32,27 @@ def DFT(A_col):
       V[i][j] = w_n**(i*j)
   return np.dot(V,A_col)
 
-def iDFT(A_col):
+def DFT(A):
+  n = len(A)
+  w_n = np.exp(2*np.pi*1j/n)
+  #V = np.array([[0.+1j]*n]*n)
+  V = np.array([[0.+1j]*n for _ in range(n)])
+  for i in range(n):
+    for j in range(n):
+      V[i][j] = w_n**(i*j)
+  return np.dot(np.dot(V,A),V)
+
+def iDFT(A):
+  n = len(A)
+  w_n = np.exp(2*np.pi*1j/n)
+  # Vinv = np.array([[0.+1j]*n]*n)
+  Vinv = np.array([[0.+1j]*n for _ in range(n)])
+  for i in range(n):
+    for j in range(n):
+      Vinv[i][j] = w_n**(-i*j)/n
+  return np.dot(np.dot(Vinv,A),Vinv)
+
+def iDFT1(A_col):
   n = len(A_col)
   w_n = np.exp(2*np.pi*1j/n)
   # Vinv = np.array([[0.+1j]*n]*n)
@@ -41,6 +61,9 @@ def iDFT(A_col):
     for j in range(n):
       Vinv[i][j] = w_n**(-i*j)/n
   return np.dot(Vinv,A_col)
+
+#DFT=np.vectorize(DFT1)
+#iDFT=np.vectorize(iDFT1)
 
 def iFFT_recur(A):
   n = len(A)
@@ -104,12 +127,30 @@ def two_d_iFFT(A):
   
     
 def main():
-  A = [[1.,2.,3.,4.],[1.,2.,3.,4.]]
-  A_col = np.array([[1],[2],[3],[4]])
-  B = np.array([[8.,4.],[10.,1.]])
-  C = two_d_FFT(B)
+  #A = [[1.,2.,3.,4.],[1.,2.,3.,4.]]
+  #A_col = np.array([[1],[2],[3],[4]])
+  #B = np.array([[111.,1.,2.,3.],[1.,0.,3.,4.],[6.,4.,0.,1.],[1.,2.,3.,1.]])
+  #C = DFT(B)
+  #print "the DFT of B is :"
+  #print C
+  #E=iDFT(C)
+  #print "B should be :"
+  #print E
+  #print np.real(np.around(E))
+  #D=two_d_FFT(B)
+  #print D
+  #print B, type(B)
+  #print iDFT(C).astype('uint8')
+  img=np.zeros((8,8))
+  img[2]=img[2]+100
+  img=img+1
+ #print img, type(img)
+  B=two_d_FFT(img)
+  #B=np.around(B)
+  #print B
+  C=two_d_iFFT(B)
+  ##C=[map(int, row)for row in C]
+  C=np.real(np.around(C))
   print C
-  print two_d_iFFT(C)
   
-
-#main()
+main()

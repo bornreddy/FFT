@@ -38,8 +38,10 @@ def return_image(img,filename="output.jpg"):
     for row in img:
       data+=list(row)
     data=np.array(data)
-    data=data.astype('uint8')
-    img=img.astype('uint8')
+    #data=data.astype('uint8')
+    #img=img.astype('uint8')
+    data=np.real(np.around(data))
+    img=np.real(np.around(img))
     data=np.asarray(img)
 
     im=Image.fromarray(data)
