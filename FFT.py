@@ -15,7 +15,8 @@ def FFT(A):
   a_odd = A[1::2]
   y_0 = FFT(a_even) 
   y_1 = FFT(a_odd)
-  y = [0]*n
+  #y = [0]*n
+  y=np.zeros(n)+0*1j
   for k in range(n/2):
     y[k] = y_0[k] + (w * y_1[k])
     y[k+(n/2)] = y_0[k] - (w * y_1[k])
@@ -69,13 +70,14 @@ def iFFT_recur(A):
   n = len(A)
   if n == 1:
     return A
-  w_n = np.exp(-2*np.pi*1j/n)
+  w_n = np.exp((-1)*2*np.pi*1j/n)
   w = 1
   a_even = A[0::2]
   a_odd = A[1::2]
   y_0 = FFT(a_even)
   y_1 = FFT(a_odd)
-  y = [0]*n
+  #y = [0]*n
+  y=np.zeros(n)+0*1j
   for k in range(n/2):
     y[k] = y_0[k] + (w * y_1[k])
     y[k+(n/2)] = y_0[k] - (w * y_1[k])
@@ -83,10 +85,11 @@ def iFFT_recur(A):
   return y
 
 def iFFT(A):
-  n = len(A)
-  A = [c/float(n) for c in A]
+  return np.conjugate(FFT(np.conjugate(A)))/len(A)
+  #n = len(A)
+  #A = [c/float(n) for c in A]
   # return iFFT_recur(A)
-  return iFFT_recur(A)
+  #return iFFT_recur(A)
 '''defunct, use A.T where A is a np.array - also this is not finished'''
 def transpose(A):
   try:
@@ -126,6 +129,9 @@ def two_d_iFFT(A):
   return output2.T
   
     
+def test_iFFT(A):
+    return np.conjugate(FFT(np.conjugate(A)))/len(A)
+
 def main():
   #A = [[1.,2.,3.,4.],[1.,2.,3.,4.]]
   #A_col = np.array([[1],[2],[3],[4]])
@@ -141,16 +147,31 @@ def main():
   #print D
   #print B, type(B)
   #print iDFT(C).astype('uint8')
-  img=np.zeros((8,8))
-  img[2]=img[2]+100
-  img=img+1
+  #img=np.zeros((8,8))
+  #img[2]=img[2]+100
+  #img=img+1
+  #img[5][5]=30
  #print img, type(img)
-  B=two_d_FFT(img)
+  #B=DFT(img)
   #B=np.around(B)
   #print B
-  C=two_d_iFFT(B)
+  #C=iDFT(B)
   ##C=[map(int, row)for row in C]
-  C=np.real(np.around(C))
-  print C
-  
-main()
+  #C=np.real(np.around(C))
+  #print C
+
+
+  ##test 1d FFT and iFFT
+  A=np.array(range(8))
+  B=FFT(A)
+  print "forward tranforms:"
+  print np.around(B)
+  D=DFT1(A)
+  print np.around(D)
+  print "inverse transforms"
+  B2=test_iFFT(B)
+  print np.real(np.around(B2))
+  D2=iDFT1(D)
+  print np.around(D2)
+
+#main()
