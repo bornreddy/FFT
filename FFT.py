@@ -162,16 +162,24 @@ def main():
 
 
   ##test 1d FFT and iFFT
-  A=np.array(range(8))
-  B=FFT(A)
-  print "forward tranforms:"
-  print np.around(B)
-  D=DFT1(A)
-  print np.around(D)
-  print "inverse transforms"
-  B2=test_iFFT(B)
-  print np.real(np.around(B2))
-  D2=iDFT1(D)
-  print np.around(D2)
+  #A=np.array(range(8))
+  #B=FFT(A)
+  #print "forward tranforms:"
+  #print np.around(B)
+  #D=DFT1(A)
+  #print np.around(D)
+  #print "inverse transforms"
+  #B2=test_iFFT(B)
+  #print np.real(np.around(B2))
+  #D2=iDFT1(D)
+  #print np.around(D2)
 
+  #test symmetry of 2d FFT
+  A=np.random.rand(8,8)
+  print "input:" 
+  print A
+
+  B=two_d_FFT(A)
+  print "FFT(A):"
+  print np.around(B)
 #main()

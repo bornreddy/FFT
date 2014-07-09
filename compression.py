@@ -1,6 +1,7 @@
 from PIL_data import *
 from FFT import *
 from cmath import *
+import matplotlib.pylab as plt
 COMPRESSION_PERCENT = 10
 COMPRESSION_FACTOR = 2 #must be a power of two
 
@@ -28,34 +29,47 @@ def jpg_compress(filename = "images/small.jpg"):
   # np.around(compressed_img) #doesn't mutate 
   return_image(compressed_img)
 
-def compress(filename="lena.mn",compression_factor=1):
+def compress(filename="lena.mn",compression_percent=1,compression_threshold=10):
   data = read_mn(filename)
   transformed_data = two_d_FFT(data)
-  # print transformed_data[0][0:4]
-  width,height = data.shape
-  new_width = int(round(compression_factor*width))
-  new_height = int(round(compression_factor*height))
-  compressed_data = [[transformed_data[i][j] for j in range(new_width)] for i in range(new_height)]
+  #print "DC component is ", transformed_data[0][0]
+  #by symmetry, the lower half of the data can be reproduced by the top half +1 row
+  #upper_half=np.array([transformed_data[i] for i in range(len(transformed_data)/2+1)])
+
+  upper_half=np.array([row for row in transformed_data[:len(transformed_data)/2+1]])
+  #throw away small values
+  for row,row_num in enumerate(upper_half):
+    for col,col_num in enumerate(row):
+      if abs(col.real)<compression_threshold:
+        upper_half[row_num][col_num]=upper_half[row_num][col_num].imag*1j
+      if abs(col.imag)<compression_threshold:
+        upper_half[row_num][col_num]=upper_half[row_num][col_num].real
+
+  upper_half_imag=upper_half.imag
+  upper_half_real=upper_half.real
   
-  #splitting up complex numbers and normalizing both resulting matrices
-  compressed_real,a_real,b_real = normalize(np.real(compressed_data))
-  compressed_imag, a_imag, b_imag = normalize(np.imag(compressed_data))
-  # compressed_normalized = np.around(compressed_real + 1j*(compressed_imag))
-  write_mnc(filename+"c",compressed_real,compressed_imag, (width,height),(a_real,b_real,a_imag,b_imag))
+
+  
+  write_mnc(filename+"c",upper_half_real,upper_half_imag, (len(data),len(data)),(1,0,1,0))
 
 def decompress(filename="lena.mnc"):
+  #read mnc - must be changed to construct the "data" matrix using bad_notation(x_n-j,_n-k) rule
+  #no need to store original_size. 
   data, original_size = read_mnc(filename)
   width, height = data.shape
-  extended_width = original_size[0] - width
-  extended_height = original_size[1] - height
-  row_pad = np.zeros(extended_width)
-  data = [np.hstack((row,row_pad)) for row in data]
-  col_pad = np.zeros((extended_height,original_size[0]))
-  data = np.vstack((data,col_pad))
-  print data.shape
+  #pad with zeros to full size
+  # extended_width = original_size[0] - width
+  # extended_height = original_size[1] - height
+  # row_pad = np.zeros(extended_width)
+  # data = [np.hstack((row,row_pad)) for row in data]
+  # col_pad = np.zeros((extended_height,original_size[0]))
+  # data = np.vstack((data,col_pad))
+  # print data.shape
   iFFT_data = two_d_iFFT(data).real
-  print iFFT_data[0]
-  return iFFT_data
+
+  write_mn(iFFT_data)
+  write_ppm(iFFT_data)
+  #return iFFT_data
 
 
 
@@ -65,5 +79,5 @@ def decompress(filename="lena.mnc"):
 
 
 
-
-# compress()
+compress()
+decompress(filename="lena_threshold10.mn",compression_percent=1,compression_threshold=10))
