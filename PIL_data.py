@@ -111,14 +111,14 @@ def write_mnc(filename,data_real, data_imag,original_size,norm_params):
     f.write(str(i) + "\n")
   for row in data_real:
     for column in row:
-      #f.write(str(int(np.around(column))))
-      f.write(str(column))
+      f.write(str(int(np.around(column))))
+      #f.write(str(column))
       f.write(" ")
     f.write(str("\n"))
   for row in data_imag:
     for column in row:
-      #f.write(str(int(np.around(column))))
-      f.write(str(column))
+      f.write(str(int(np.around(column))))
+      #f.write(str(column))
       f.write(" ")
     f.write(str("\n"))
     #f.write('\n')
@@ -215,7 +215,7 @@ def write_ppm(data, filename="output_lena"):
       out_string = (str(column) + " ")*3
       f.write(out_string)
   f.close()
-
+  print "i just wrote a ppm file called "+filename
 #read_mnc()
 # ppm2mn()
 # data = read_mn()

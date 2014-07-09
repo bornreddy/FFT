@@ -29,7 +29,7 @@ def jpg_compress(filename = "images/small.jpg"):
   # np.around(compressed_img) #doesn't mutate 
   return_image(compressed_img)
 
-def compress(filename="lena.mn",compression_percent=1,compression_threshold=10):
+def compress(filename="lena.mn",compression_percent=1,compression_threshold=10000):
   data = read_mn(filename)
   transformed_data = two_d_FFT(data)
   #print "DC component is ", transformed_data[0][0]
@@ -38,8 +38,8 @@ def compress(filename="lena.mn",compression_percent=1,compression_threshold=10):
 
   upper_half=np.array([row for row in transformed_data[:len(transformed_data)/2+1]])
   #throw away small values
-  for row,row_num in enumerate(upper_half):
-    for col,col_num in enumerate(row):
+  for row_num,row in enumerate(upper_half):
+    for col_num,col in enumerate(row):
       if abs(col.real)<compression_threshold:
         upper_half[row_num][col_num]=upper_half[row_num][col_num].imag*1j
       if abs(col.imag)<compression_threshold:
@@ -80,4 +80,4 @@ def decompress(filename="lena.mnc"):
 
 
 compress()
-decompress(filename="lena_threshold10.mn",compression_percent=1,compression_threshold=10))
+decompress()
