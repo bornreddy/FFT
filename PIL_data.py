@@ -104,25 +104,90 @@ def read_mn(filename="lena.mn"):
   return np.array(data)
 
 def write_mnc(filename,data_real, data_imag,original_size,norm_params):
+  #data_real and data_imag should be flat
   f = open(filename,"w+")
   f.write(str(original_size[0])); f.write('\n'); f.write(str(original_size[1]))
   f.write('\n')
   for i in norm_params:
     f.write(str(i) + "\n")
-  for row in data_real:
-    for column in row:
-      f.write(str(int(np.around(column))))
-      #f.write(str(column))
-      f.write(" ")
-    f.write(str("\n"))
-  for row in data_imag:
-    for column in row:
-      f.write(str(int(np.around(column))))
-      #f.write(str(column))
-      f.write(" ")
-    f.write(str("\n"))
+
+  #do run length encoding
+  data_real=run_length_encode(data_real);
+  data_imag=run_length_encode(data_imag);
+
+  for i in data_real:
+    f.write(str(i)+" ")
+  for i in data_imag:
+    f.write(str(i)+" ")
+
+  # for row in data_real:
+  #   for column in row:
+  #     f.write(str(int(np.around(column))))
+  #     #f.write(str(column))
+  #     f.write(" ")
+  #   f.write(str("\n"))
+  # for row in data_imag:
+  #   for column in row:
+  #     f.write(str(int(np.around(column))))
+  #     #f.write(str(column))
+  #     f.write(" ")
+  #   f.write(str("\n"))
     #f.write('\n')
   f.close()
+
+def run_length_encode(data):
+  
+  edata=[]
+  in_zero_run=False;
+  count=0
+
+  for ind,c in enumerate(data):
+    #take care of last element separately
+    if(ind==len(data)-1):
+      if(c==0 and in_zero_run):
+        count+=1
+        edata.append('z'+str(count))
+      if(c==0 and not in_zero_run):
+        edata.append(0)
+      elif(c!=0 and in_zero_run):
+        edata.append('z'+str(count))
+        edata.append(c)
+      elif(c!=0 and not in_zero_run):
+        edata.append(c)
+      return edata
+
+    elif (c==0 and in_zero_run):
+      count+=1;
+    elif(c==0 and not in_zero_run):
+      in_zero_run=True
+      count=1
+    elif(c!=0 and in_zero_run):
+      in_zero_run=False
+      if(count==1):
+        edata.append('0')
+      else:
+        edata.append('z'+str(count))
+      edata.append(c)
+      count=0
+    elif(c!=0 and not in_zero_run):
+      edata.append(c)
+  
+
+
+def run_length_unencode(data):
+  #print data 
+  #data is a list of strings
+  udata=[]
+  for c in data:
+    if c[0]=='z':
+      zlen=int(c[1:])
+      for i in range(zlen):
+        udata.append(0.0)
+    else: #its just a number
+      udata.append(float(c))
+  return np.array(udata)
+
+#print run_length_unencode(run_length_encode([0,0,1,0,0,1,0]))
 
 def read_mnc(filename="lena.mnc"):
   f = open(filename,"r+");
@@ -133,23 +198,32 @@ def read_mnc(filename="lena.mnc"):
   b_real = float(f.readline())
   a_imag = float(f.readline())
   b_imag = float(f.readline())
-  data_array = [] #this will be filled in with the real matrix stacked over the imaginary matrix
-  line = f.readline()
-  while line:
-    array_line = [float(i) for i in line.split()]
-    data_array.append(array_line)
-    line = f.readline()
-  height = len(data_array)
-  width=len(data_array[0])
+  data_array=f.readline().split() #a massive, long data array
+  data_array=np.array([i for i in data_array])
+  data_array=run_length_unencode(data_array)
 
+  #data_array = [] #this will be filled in with the real matrix stacked over the imaginary matrix
+  #line = f.readline()
+  #while line:
+  #  array_line = [float(i) for i in line.split()]
+  #  data_array.append(array_line)
+  #  line = f.readline()
+  #height = len(data_array)
+  #width=len(data_array[0])
+
+  #split into real and imaginary parts
+  print "size of data_array", data_array.shape
+  da_real=data_array[0:len(data_array)/2].reshape((original_height/2+1,original_width))
+  da_imag=data_array[len(data_array)/2:].reshape((original_height/2+1,original_width))
 
   # denormalizing real and imag arrays
-  real_array = np.array(data_array[:height/2])
-  real_array = (real_array-b_real)/a_real
-  imag_array = np.array(data_array[height/2:])
-  imag_array = (imag_array-b_imag)/a_imag
+  #real_array = np.array(data_array[:height/2])
+  #real_array = (real_array-b_real)/a_real
+  #imag_array = np.array(data_array[height/2:])
+  #imag_array = (imag_array-b_imag)/a_imag
 
-  upper_half=real_array+1j*imag_array
+
+  upper_half=da_real+1j*da_imag
   upper_rows,upper_columns=upper_half.shape
 
   FFT_data=np.vstack((upper_half,np.zeros((upper_rows-2,upper_columns))))
@@ -158,8 +232,8 @@ def read_mnc(filename="lena.mnc"):
   new_row_num=upper_rows+1
   last_row_num=len(FFT_data)
   for row in range(new_row_num,last_row_num):
-    for column in range(width):
-      pair_row,pair_column=find_pair((row,column,width))
+    for column in range(original_width):
+      pair_row,pair_column=find_pair((row,column,original_width))
       new_val=np.conjugate(FFT_data[pair_row][pair_column])
       FFT_data[row][column]=new_val
 

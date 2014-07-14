@@ -29,28 +29,45 @@ def jpg_compress(filename = "images/small.jpg"):
   # np.around(compressed_img) #doesn't mutate 
   return_image(compressed_img)
 
-def compress(filename="lena.mn",compression_percent=1,compression_threshold=10000):
+def compress(filename="lena.mn",compression_factor=.5,compression_threshold=10000):
   data = read_mn(filename)
   transformed_data = two_d_FFT(data)
-  #print "DC component is ", transformed_data[0][0]
+  col_length=len(transformed_data) #also equals the number of rows
+  row_length=len(transformed_data[0]) #also equals the number of columns
+  #flatten the array:
+  transformed_data=transformed_data.reshape((1,np.multiply(*transformed_data.shape)))[0]
+
+  compression_threshold={'real':0,'imag':0}
+  compression_threshold['real']=find_threshold(transformed_data.real,compression_factor)
+  compression_threshold['imag']=find_threshold(transformed_data.imag,compression_factor)
+
   #by symmetry, the lower half of the data can be reproduced by the top half +1 row
   #upper_half=np.array([transformed_data[i] for i in range(len(transformed_data)/2+1)])
+  upper_half=np.array(transformed_data[:(col_length/2+1)*row_length])
 
-  upper_half=np.array([row for row in transformed_data[:len(transformed_data)/2+1]])
+  #split into two pieces, real and imag
+  uh_real=upper_half.real
+  uh_imag=upper_half.imag 
   #throw away small values
-  for row_num,row in enumerate(upper_half):
-    for col_num,col in enumerate(row):
-      if abs(col.real)<compression_threshold:
-        upper_half[row_num][col_num]=upper_half[row_num][col_num].imag*1j
-      if abs(col.imag)<compression_threshold:
-        upper_half[row_num][col_num]=upper_half[row_num][col_num].real
-
-  upper_half_imag=upper_half.imag
-  upper_half_real=upper_half.real
+  uh_real=np.array([i if abs(i)>compression_threshold['real'] else 0 for i in uh_real])
+  uh_imag=np.array([i if abs(i)>compression_threshold['imag'] else 0 for i in uh_imag])
   
+  #shape them back into two dimensional things
+  #uh_real=uh_real.reshape((col_length/2+1,row_length))
+  #uh_imag=uh_imag.reshape((col_length/2+1,row_length))
 
-  
-  write_mnc(filename+"c",upper_half_real,upper_half_imag, (len(data),len(data)),(1,0,1,0))
+  write_mnc(filename+"c",np.around(uh_real).astype('int'),np.around(uh_imag).astype('int'), (len(data),len(data)),(1,0,1,0))
+
+def find_threshold(data,compression_factor):
+  #data=abs(data.reshape((1,np.multiply(*data.shape)))[0]) #flatten the array for sorting
+  #assume a 1d data shape
+  #print "data shape: ", data.shape
+  data_local=abs(data)
+  data_local.sort()
+  threshold_spot=int(float(len(data))*(1-compression_factor))
+  #print "threshold_spot:",threshold_spot
+  #print "threshold_value:",data[threshold_spot]
+  return data_local[threshold_spot]
 
 def decompress(filename="lena.mnc"):
   #read mnc - must be changed to construct the "data" matrix using bad_notation(x_n-j,_n-k) rule
@@ -78,6 +95,8 @@ def decompress(filename="lena.mnc"):
 # write_mn(iFFT_data)
 
 
-
+print "compressing..."
 compress()
+
+print "decompressing..."
 decompress()

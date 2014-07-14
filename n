@@ -1,0 +1,68 @@
+import numpy as np
+a=np.array([1,2,3])
+a[0]='z100'
+# OUT: Traceback (most recent call last):
+# OUT:   File "<input>", line 1, in <module>
+# OUT: ValueError: invalid literal for long() with base 10: 'z100'
+a
+# OUT: array([1, 2, 3])
+from PIL_data import *
+# OUT: Traceback (most recent call last):
+# OUT:   File "<input>", line 1, in <module>
+# OUT:   File "PIL_data.py", line 143
+# OUT:     if c==0:
+# OUT:    ^
+# OUT: IndentationError: unexpected indent
+from PIL_data import *
+from PIL_data import *
+run_length_encode([1,0,0,0,0,2])
+# OUT: [1, 'z4', 2]
+run_length_encode([1,0,0,0,0,2,0,0,0])
+# OUT: Traceback (most recent call last):
+# OUT:   File "<input>", line 1, in <module>
+# OUT:   File "PIL_data.py", line 148, in run_length_encode
+# OUT:     nextc=data[ind+counter]
+# OUT: IndexError: list index out of range
+from PIL_data import *
+run_length_encode([1,0,0,0,0,2,0,0,0])
+# OUT: Traceback (most recent call last):
+# OUT:   File "<input>", line 1, in <module>
+# OUT:   File "PIL_data.py", line 148, in run_length_encode
+# OUT:     nextc=data[ind+counter]
+# OUT: IndexError: list index out of range
+from PIL_data import *
+run_length_encode([1,0,0,0,0,2,0,0,0])
+# OUT: Traceback (most recent call last):
+# OUT:   File "<input>", line 1, in <module>
+# OUT:   File "PIL_data.py", line 148, in run_length_encode
+# OUT:     nextc=data[ind+counter]
+# OUT: IndexError: list index out of range
+reload(PIL_data)
+# OUT: Traceback (most recent call last):
+# OUT:   File "<input>", line 1, in <module>
+# OUT: NameError: name 'PIL_data' is not defined
+import(PIL_data)
+# OUT:   File "<input>", line 1
+# OUT:     import(PIL_data)
+# OUT:           ^
+# OUT: SyntaxError: invalid syntax
+import PIL_data
+from PIL_data import *
+run_length_encode([1,0,0,0,0,2,0,0,0])
+# OUT: Traceback (most recent call last):
+# OUT:   File "<input>", line 1, in <module>
+# OUT:   File "PIL_data.py", line 148, in run_length_encode
+# OUT:     nextc=data[ind+counter]
+# OUT: IndexError: list index out of range
+len(4)
+# OUT: Traceback (most recent call last):
+# OUT:   File "<input>", line 1, in <module>
+# OUT: TypeError: object of type 'int' has no len()
+type('z4')=type('a')
+# OUT:   File "<input>", line 1
+# OUT: SyntaxError: can't assign to function call
+type('z4')==type('a')
+# OUT: True
+a='0'
+a[0]
+# OUT: '0'
