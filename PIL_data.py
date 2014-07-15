@@ -212,7 +212,7 @@ def read_mnc(filename="lena.mnc"):
   #width=len(data_array[0])
 
   #split into real and imaginary parts
-  print "size of data_array", data_array.shape
+  #print "size of data_array", data_array.shape
   da_real=data_array[0:len(data_array)/2].reshape((original_height/2+1,original_width))
   da_imag=data_array[len(data_array)/2:].reshape((original_height/2+1,original_width))
 
@@ -289,7 +289,7 @@ def write_ppm(data, filename="output_lena"):
       out_string = (str(column) + " ")*3
       f.write(out_string)
   f.close()
-  print "i just wrote a ppm file called "+filename
+  #print "i just wrote a ppm file called "+filename
 #read_mnc()
 # ppm2mn()
 # data = read_mn()

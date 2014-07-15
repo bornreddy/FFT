@@ -125,7 +125,6 @@ def two_d_iFFT(A):
   output2 = np.array([[0.+1j]*num_rows for _ in range(num_cols)])
   for i in range(num_cols):
     output2[i] = iFFT(output[i])
-  print "finished two_d_iFFT"
   return output2.T
   
     

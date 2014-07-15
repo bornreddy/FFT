@@ -2,6 +2,7 @@ from PIL_data import *
 from FFT import *
 from cmath import *
 import matplotlib.pylab as plt
+import os
 COMPRESSION_PERCENT = 10
 COMPRESSION_FACTOR = 2 #must be a power of two
 
@@ -29,7 +30,7 @@ def jpg_compress(filename = "images/small.jpg"):
   # np.around(compressed_img) #doesn't mutate 
   return_image(compressed_img)
 
-def compress(filename="lena.mn",compression_factor=.5,compression_threshold=10000):
+def compress(filename="lena.mn",output_filename="lena",compression_factor=.5):
   data = read_mn(filename)
   transformed_data = two_d_FFT(data)
   col_length=len(transformed_data) #also equals the number of rows
@@ -56,17 +57,18 @@ def compress(filename="lena.mn",compression_factor=.5,compression_threshold=1000
   #uh_real=uh_real.reshape((col_length/2+1,row_length))
   #uh_imag=uh_imag.reshape((col_length/2+1,row_length))
 
-  write_mnc(filename+"c",np.around(uh_real).astype('int'),np.around(uh_imag).astype('int'), (len(data),len(data)),(1,0,1,0))
+  write_mnc(output_filename+".mnc",np.around(uh_real).astype('int'),np.around(uh_imag).astype('int'), (len(data),len(data)),(1,0,1,0))
 
 def find_threshold(data,compression_factor):
   #data=abs(data.reshape((1,np.multiply(*data.shape)))[0]) #flatten the array for sorting
   #assume a 1d data shape
-  #print "data shape: ", data.shape
   data_local=abs(data)
   data_local.sort()
   threshold_spot=int(float(len(data))*(1-compression_factor))
   #print "threshold_spot:",threshold_spot
   #print "threshold_value:",data[threshold_spot]
+  if compression_factor==0:
+    return data_local[len(data)-1]
   return data_local[threshold_spot]
 
 def decompress(filename="lena.mnc"):
@@ -84,8 +86,8 @@ def decompress(filename="lena.mnc"):
   # print data.shape
   iFFT_data = two_d_iFFT(data).real
 
-  write_mn(iFFT_data)
-  write_ppm(iFFT_data)
+  write_mn(iFFT_data,filename[:-4])
+  write_ppm(iFFT_data,filename[:-4])
   #return iFFT_data
 
 
@@ -93,10 +95,27 @@ def decompress(filename="lena.mnc"):
 # iFFT_data = decompress()
 
 # write_mn(iFFT_data)
+def generate_images():
+  factors=np.linspace(0,1,20)
+  factor_data='';
+  filesize_data=''
+  for f in factors:
+    #so .04 becomes "04"
+    factor_string="{}{}".format(int(f*10),int(f*100)-10*int(f*10))
+    output_filename="output_files/lena"+factor_string
+    compress(filename="lena.mn",output_filename=output_filename,compression_factor=f)
+    
+    factor_data+=(str(f)+' ')
+    filesize_data+=str(os.path.getsize("output_files/lena"+factor_string+".mnc"))+' '
+    
+    decompress(output_filename+".mnc")
 
+  f=open("output_files/data_file.txt","w+")
+  f.write(factor_data)
+  f.write('\n')
+  f.write(filesize_data)
+  f.close()
+  
+  
 
-print "compressing..."
-compress()
-
-print "decompressing..."
-decompress()
+generate_images()
