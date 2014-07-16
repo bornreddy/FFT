@@ -3,7 +3,7 @@
 <style>
 
 body {
-  font: 20px sans-serif;
+  font: 10px sans-serif;
 }
 
 .axis path,
@@ -25,29 +25,28 @@ body {
 
 </style>
 <body>
-<script src="http://d3js.org/d3.v3.js"></script>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script>
 
-var margin = {top: 20, right: 20, bottom: 70, left: 200},
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
 var parseDate = d3.time.format("%d-%b-%y").parse;
 
-var x = d3.scale.linear()
-    .range([width,0]);
+var x = d3.time.scale()
+    .range([0, width]);
 
 var y = d3.scale.linear()
     .range([height, 0]);
 
-var xAxis = d3.svg.axis()
+/*var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom");
 
 var yAxis = d3.svg.axis()
     .scale(y)
-    .orient("left")
-    .tickFormat(function(d) {return '';});
+    .orient("left");
 
 var line = d3.svg.line()
     .x(function(d) { return x(d.date); })
@@ -58,43 +57,20 @@ var svg = d3.select("body").append("svg")
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-/*
-d3.tsv("data.tsv", function(error, data) {
+*/
+/*d3.tsv("data.tsv", function(error, data) {
   data.forEach(function(d) {
     d.date = parseDate(d.date);
     d.close = +d.close;
   });
-*/
-//creates an object called data
-d3.tsv("data_file.txt", function(error, reversed_data) {
-  reversed_data.forEach(function(d) {
-    d.date = d.date;
-    d.close = +d.filesize;
-    
-  });
 
-  data=reversed_data;
-  //for(var i=0; i<data.length;i++){
-   //data[i]=reversed_data[data.length-i-1];
-
-  //}
-
-//probably sets limits of the axes
   x.domain(d3.extent(data, function(d) { return d.date; }));
   y.domain(d3.extent(data, function(d) { return d.close; }));
 
   svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
-      .call(xAxis)
-    .append("text")
-      .attr("transform", "rotate(0)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .attr("transform", "translate(200,30)")
-      .style("text-anchor", "end")
-      .text("Compression Factor");
-
+      .call(xAxis);
 
   svg.append("g")
       .attr("class", "y axis")
@@ -102,15 +78,14 @@ d3.tsv("data_file.txt", function(error, reversed_data) {
     .append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
-      .attr("dy", ".91em")
+      .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("File Size");
+      .text("Price ($)");
 
   svg.append("path")
       .datum(data)
       .attr("class", "line")
-      .attr("d", line)
-//      .attr("fill","red").attr("r",15);
+      .attr("d", line);
 });
-
+*/
 </script>

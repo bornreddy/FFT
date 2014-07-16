@@ -99,23 +99,21 @@ def generate_images():
   factors=np.linspace(0,1,20)
   factor_data='';
   filesize_data=''
+  outfile=open("output_files/data_file.txt","w+")
   for f in factors:
+    print "processing factor: ",f
     #so .04 becomes "04"
     factor_string="{}{}".format(int(f*10),int(f*100)-10*int(f*10))
     output_filename="output_files/lena"+factor_string
     compress(filename="lena.mn",output_filename=output_filename,compression_factor=f)
-    
-    factor_data+=(str(f)+' ')
-    filesize_data+=str(os.path.getsize("output_files/lena"+factor_string+".mnc"))+' '
-    
+    #factor_data=(str(f)+' ')
+    filesize=str(os.path.getsize("output_files/lena"+factor_string+".mnc"))+' '
     decompress(output_filename+".mnc")
+    outfile.write(str(f)+'\t')
+    outfile.write(filesize)
+    outfile.write('\n')
 
-  f=open("output_files/data_file.txt","w+")
-  f.write(factor_data)
-  f.write('\n')
-  f.write(filesize_data)
-  f.close()
-  
+  outfile.close()
   
 
 generate_images()
