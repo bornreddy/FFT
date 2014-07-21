@@ -6,33 +6,9 @@ import os
 COMPRESSION_PERCENT = 10
 COMPRESSION_FACTOR = 2 #must be a power of two
 
-def jpg_compress(filename = "images/small.jpg"):
-  filename = "images/tiger.jpg"
-  img = get_image(filename)
-  #img=np.array([[img[x][y] for y in range(8)] for x in range(8)])
-  #print img
-  #print "dims of im", len(img),len(img[0]), type(img)
-  #img=np.zeros((10,10))
-  #img[5]=img[5]+100
-  #print img
-  #img is now a np.array of np.arrays with dimensions that are powers of two
-  FFT_img = two_d_FFT(img)
-  #new_width = (len(FFT_img[0])*(100-COMPRESSION_PERCENT))/100
-  #new_height = (len(FFT_img)*(100-COMPRESSION_PERCENT))/100
-  new_width=len(FFT_img[0])/COMPRESSION_FACTOR
-  new_height=len(FFT_img)/COMPRESSION_FACTOR
-  #print new_width, new_height
-  compressed_FFT_img = np.zeros((new_width, new_height))
-  compressed_FFT_img = [[FFT_img[j][i] for i in range(new_height)] for j in range(new_width)]
-  compressed_img=np.real(two_d_iFFT(compressed_FFT_img))
-  #print "dims of im", len(img),len(img[0])
-  #print "dims of new img", len(compressed_img),len(compressed_img[0]),type(compressed_img)
-  # np.around(compressed_img) #doesn't mutate 
-  return_image(compressed_img)
-
 def compress(filename="lena.mn",output_filename="lena",compression_factor=.5):
   data = read_mn(filename)
-  transformed_data = two_d_FFT(data)
+  transformed_data = FFT(data)
   col_length=len(transformed_data) #also equals the number of rows
   row_length=len(transformed_data[0]) #also equals the number of columns
   #flatten the array:
@@ -60,13 +36,12 @@ def compress(filename="lena.mn",output_filename="lena",compression_factor=.5):
   write_mnc(output_filename+".mnc",np.around(uh_real).astype('int'),np.around(uh_imag).astype('int'), (len(data),len(data)),(1,0,1,0))
 
 def find_threshold(data,compression_factor):
-  #data=abs(data.reshape((1,np.multiply(*data.shape)))[0]) #flatten the array for sorting
-  #assume a 1d data shape
+  
+  #assumes a 1d data shape
   data_local=abs(data)
   data_local.sort()
   threshold_spot=int(float(len(data))*(1-compression_factor))
-  #print "threshold_spot:",threshold_spot
-  #print "threshold_value:",data[threshold_spot]
+  
   if compression_factor==0:
     return data_local[len(data)-1]
   return data_local[threshold_spot]
@@ -84,19 +59,15 @@ def decompress(filename="lena.mnc"):
   # col_pad = np.zeros((extended_height,original_size[0]))
   # data = np.vstack((data,col_pad))
   # print data.shape
-  iFFT_data = two_d_iFFT(data).real
+  iFFT_data = iFFT(data).real
 
   write_mn(iFFT_data,filename[:-4])
   write_ppm(iFFT_data,filename[:-4])
   #return iFFT_data
 
-
-
-# iFFT_data = decompress()
-
-# write_mn(iFFT_data)
 def generate_images():
-  factors=np.linspace(0,1,41)
+  #factors=np.linspace(0,1,41)
+  factors=[.4];
   factor_data='';
   filesize_data=''
   outfile=open("output_files/data_file.txt","w+")

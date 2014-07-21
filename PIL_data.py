@@ -1,87 +1,13 @@
-from PIL import Image
 import numpy as np
 
-
-def get_image(filename="images/tiger.jpg"):
-  "opens image, converts to grayscale, and returns a np.array of np.arrays with intensity data"	
-  width_extended = int()
-  height_extended = int()
-  img = Image.open(filename)
-  img = img.convert('L')
-  width,height = img.size
-  n = 1
-  while True:
-    if width <= 2**n:
-      width_extended = 2**n
-      break
-    else:
-      n += 1
-  n = 1
-  while True:
-    if height <= 2**n:
-      height_extended = 2**n
-      break
-    else:
-      n += 1
-  row_pad = list(np.zeros(width_extended-width)) #zeros at the end of each row so we have length as a power of two
-  extra_rows = [np.zeros(width_extended) for _ in range(height_extended-height)]
-  data = img.getdata()
-  output = np.array([])
-  output = np.array([np.array([data[i] for i in range(n*width,(n+1)*width)]+row_pad) for n in range(height)]+extra_rows)
-  print "got image, padded dimensions with zeros"
-  return output
-
-def return_image(img,filename="output.jpg"):
-    #arr=(img).astype('uint8')
-    data=[]
-    img=normalize(img)
-    for row in img:
-      data+=list(row)
-    data=np.array(data)
-    #data=data.astype('uint8')
-    #img=img.astype('uint8')
-    data=np.real(np.around(data))
-    img=np.real(np.around(img))
-    data=np.asarray(img)
-    im=Image.fromarray(data)
-    #im.show()
-    print im.mode
-    im = im.convert('L')
-    #im.show()
-    im.save(filename,"JPEG")
-
-def normalize(matrix, maxcolor=255., mincolor=0,):
-  #find the maximum
-  m=[]#max 
-  s=[]#min
-  for row in matrix:
-    m.append(max(row))
-    s.append(min(row))
-  matrix_max=max(m)
-  matrix_min=min(s)
-  #print matrix_max, matrix_min
-  a=(mincolor-maxcolor)/(matrix_min-matrix_max)
-  b=(matrix_min*maxcolor-matrix_max*mincolor)/(matrix_min-matrix_max)
-  return a*matrix+b, a, b
-  #for row in matrix:
-  #  for column in row:
-  #    matrix[row][column]*=n_factor
-  #return matrix 
-
-def denormalize(matrix,a,b):
-  return (matrix-b)/a
-
-
-#takes in ppm filename
-def ppm2grey():
-  ppmFile="lena.ppm"
+def ppm2mn(ppmFile="lena.ppm"):
+  '''Converts a file from ppm to mn.
+     Records only greyscale, not rgb values.'''
   img = Image.open(ppmFile)
   img = img.convert('L')
   width,height = img.size
   data = list(img.getdata())
-  # data_mat = [[data[i] for i in range(n*width,(n+1)*height)] for n in range(height)]
   data_mat = [data[n*width:(n+1)*width] for n in range(height)]
-  
   f = open(ppmFile[:-4]+".mn",'w+')
   f.write(str(width)); f.write("\n"); f.write(str(height))
   f.write('\n')
@@ -90,11 +16,10 @@ def ppm2grey():
       f.write(str(column))
       f.write(" ")
     f.write(str("\n"))
-    #f.write('\n')
   f.close()
-  #this is a guess
 
 def read_mn(filename="lena.mn"):
+  '''returns data from an mn file as a two-dimensional numpy array'''
   f = open(filename)
   width = int(f.readline())
   height = int(f.readline())
@@ -104,43 +29,27 @@ def read_mn(filename="lena.mn"):
   return np.array(data)
 
 def write_mnc(filename,data_real, data_imag,original_size,norm_params):
-  #data_real and data_imag should be flat
+  '''takes in a filename, a numpy array split into real and imaginary parts, and original size'''
+  '''!!!!! get rid of norm params!!!!!''' 
   f = open(filename,"w+")
   f.write(str(original_size[0])); f.write('\n'); f.write(str(original_size[1]))
   f.write('\n')
   for i in norm_params:
     f.write(str(i) + "\n")
-
   #do run length encoding
   data_real=run_length_encode(data_real);
   data_imag=run_length_encode(data_imag);
-
   for i in data_real:
     f.write(str(i)+" ")
   for i in data_imag:
     f.write(str(i)+" ")
-
-  # for row in data_real:
-  #   for column in row:
-  #     f.write(str(int(np.around(column))))
-  #     #f.write(str(column))
-  #     f.write(" ")
-  #   f.write(str("\n"))
-  # for row in data_imag:
-  #   for column in row:
-  #     f.write(str(int(np.around(column))))
-  #     #f.write(str(column))
-  #     f.write(" ")
-  #   f.write(str("\n"))
-    #f.write('\n')
   f.close()
 
 def run_length_encode(data):
-  
+  '''replaces subarray of zeros of length n with 'zn' '''
   edata=[]
   in_zero_run=False;
   count=0
-
   for ind,c in enumerate(data):
     #take care of last element separately
     if(ind==len(data)-1):
@@ -175,8 +84,7 @@ def run_length_encode(data):
 
 
 def run_length_unencode(data):
-  #print data 
-  #data is a list of strings
+  '''inserts an array n zeros in place of string 'zn'''
   udata=[]
   for c in data:
     if c[0]=='z':
@@ -190,6 +98,8 @@ def run_length_unencode(data):
 #print run_length_unencode(run_length_encode([0,0,1,0,0,1,0]))
 
 def read_mnc(filename="lena.mnc"):
+  '''reads a .mnc file and returns a complex, two-dimensional array of 
+  frequency data and the original image size'''
   f = open(filename,"r+");
   original_width = int(f.readline())
   original_height = int(f.readline())
@@ -201,33 +111,12 @@ def read_mnc(filename="lena.mnc"):
   data_array=f.readline().split() #a massive, long data array
   data_array=np.array([i for i in data_array])
   data_array=run_length_unencode(data_array)
-
-  #data_array = [] #this will be filled in with the real matrix stacked over the imaginary matrix
-  #line = f.readline()
-  #while line:
-  #  array_line = [float(i) for i in line.split()]
-  #  data_array.append(array_line)
-  #  line = f.readline()
-  #height = len(data_array)
-  #width=len(data_array[0])
-
   #split into real and imaginary parts
-  #print "size of data_array", data_array.shape
   da_real=data_array[0:len(data_array)/2].reshape((original_height/2+1,original_width))
   da_imag=data_array[len(data_array)/2:].reshape((original_height/2+1,original_width))
-
-  # denormalizing real and imag arrays
-  #real_array = np.array(data_array[:height/2])
-  #real_array = (real_array-b_real)/a_real
-  #imag_array = np.array(data_array[height/2:])
-  #imag_array = (imag_array-b_imag)/a_imag
-
-
   upper_half=da_real+1j*da_imag
   upper_rows,upper_columns=upper_half.shape
-
   FFT_data=np.vstack((upper_half,np.zeros((upper_rows-2,upper_columns))))
-  
   #fill in the lower half
   new_row_num=upper_rows+1
   last_row_num=len(FFT_data)
@@ -236,27 +125,18 @@ def read_mnc(filename="lena.mnc"):
       pair_row,pair_column=find_pair((row,column,original_width))
       new_val=np.conjugate(FFT_data[pair_row][pair_column])
       FFT_data[row][column]=new_val
-
   return FFT_data, original_size
 
 def find_pair((j,k,N)):
+  ''' symmetries of two-dimensional FFT data array'''
   return ((N-j)%N,(N-k)%N)
 
-
-
 def write_mn(data, filename="output_lena"):
-  # clean up data to satisfy ppm requirements
-  #data = [[int(data[i][j]) for j in range(len(data[0]))] for i in range(len(data))]
-  data = [[float(data[i][j]) for j in range(len(data[0]))] for i in range(len(data))]
+  '''Takes in an array of float image data and writes to mn format.'''
+  # clean up data to satisfy mn requirements
+  data = [[int(data[i][j]) for j in range(len(data[0]))] for i in range(len(data))]
   width = len(data[0])
   height = len(data)
-  # for i in range(width):
-  #   for j in range(height):
-  #     if data[j][i] > 255:
-  #       data[j][i] = 255
-  #     elif data[j][i] < 0:
-  #       data[j][i] = 0
-  # print data
   f = open(filename+".mn",'w+')
   f.write(str(len(data[0]))); f.write("\n"); f.write(str(len(data)))
   f.write('\n')
@@ -265,10 +145,11 @@ def write_mn(data, filename="output_lena"):
       f.write(str(column))
       f.write(" ")
     f.write(str("\n"))
-    #f.write('\n')
   f.close()
 
 def write_ppm(data, filename="output_lena"):
+  '''Takes in an array of float image data and writes to a ppm format.
+     Float truncation may lead to a tiny bit of quality loss.'''
   # clean up data
   data = [[int(data[i][j]) for j in range(len(data[0]))] for i in range(len(data))]
   width = len(data[0])
@@ -289,10 +170,3 @@ def write_ppm(data, filename="output_lena"):
       out_string = (str(column) + " ")*3
       f.write(out_string)
   f.close()
-  #print "i just wrote a ppm file called "+filename
-#read_mnc()
-# ppm2mn()
-# data = read_mn()
-# print data[0]
-  #get size, 
-
