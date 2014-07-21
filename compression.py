@@ -96,7 +96,7 @@ def decompress(filename="lena.mnc"):
 
 # write_mn(iFFT_data)
 def generate_images():
-  factors=np.linspace(0,1,20)
+  factors=np.linspace(0,1,41)
   factor_data='';
   filesize_data=''
   outfile=open("output_files/data_file.txt","w+")

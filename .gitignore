@@ -27,3 +27,5 @@ tramp
 
 # AUCTeX auto folder
 /auto/
+
+/output_files/
